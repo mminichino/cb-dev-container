@@ -1,4 +1,4 @@
-# Employee Demo Container
+# Couchbase Dev Container
 
 Container to run Sync Gateway and Couchbase Server for development purposes
 
