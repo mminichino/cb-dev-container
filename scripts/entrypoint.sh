@@ -140,6 +140,8 @@ while true; do
   sleep 1
 done
 
+touch /demo/couchbase/.ready
+
 echo "The following output is now a tail of sg_info.log:"
 tail -f /demo/couchbase/logs/sg_info.log &
 childPID=$!
