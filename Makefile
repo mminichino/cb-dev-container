@@ -14,11 +14,12 @@ push:
 	$(eval MAJOR_REV := $(shell cat $(MAJOR_REV_FILE)))
 	$(eval MINOR_REV := $(shell cat $(MINOR_REV_FILE)))
 	$(eval BUILD_REV := $(shell cat $(BUILD_REV_FILE)))
-	docker build --force-rm=true --no-cache=true -t $(CONTAINER) -f Dockerfile .
-	docker image tag $(CONTAINER):latest mminichino/$(CONTAINER):latest
-	docker image tag $(CONTAINER):latest mminichino/$(CONTAINER):$(MAJOR_REV).$(MINOR_REV).$(BUILD_REV)
-	docker push mminichino/$(CONTAINER):latest
-	docker push mminichino/$(CONTAINER):$(MAJOR_REV).$(MINOR_REV).$(BUILD_REV)
+	docker buildx build --platform linux/amd64,linux/arm64 \
+	--no-cache \
+	-t mminichino/$(CONTAINER):latest \
+	-t mminichino/$(CONTAINER):$(MAJOR_REV).$(MINOR_REV).$(BUILD_REV) \
+	-f Dockerfile . \
+	--push
 	git add -A .
 	git commit -m "Build version $(MAJOR_REV).$(MINOR_REV).$(BUILD_REV)"
 	git push -u origin main
