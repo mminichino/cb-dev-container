@@ -1,13 +1,16 @@
 FROM ubuntu:focal as base
 
 # Install required OS packages
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=Etc/UTC
 RUN apt-get update
-RUN DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get install -q -y runit numactl tzdata lsof lshw bzip2 jq git vim netcat sysstat apt-utils ca-certificates gnupg lsb-release net-tools python3.9 python3.9-dev python3-pip python3-setuptools cmake build-essential curl sudo
+RUN apt-get install -q -y runit numactl tzdata lsof lshw bzip2 jq git vim netcat sysstat apt-utils ca-certificates gnupg lsb-release net-tools python3.9 python3.9-dev python3-pip python3-setuptools cmake build-essential curl sudo software-properties-common make pkg-config libssl-dev
 
 # Get Couchbase release package and Sync Gateway package
-RUN curl -s -o /var/tmp/couchbase-release-1.0-amd64.deb https://packages.couchbase.com/releases/couchbase-release/couchbase-release-1.0-amd64.deb
-RUN curl -s -o /var/tmp/couchbase-sync-gateway-enterprise_3.0.3_x86_64.deb http://packages.couchbase.com/releases/couchbase-sync-gateway/3.0.3/couchbase-sync-gateway-enterprise_3.0.3_x86_64.deb
-RUN dpkg -i /var/tmp/couchbase-release-1.0-amd64.deb
+RUN SGW_ARCH=$(dpkg --print-architecture) \
+    && curl -s -o /var/tmp/couchbase-server-enterprise.deb "https://packages.couchbase.com/releases/7.1.3/couchbase-server-enterprise_7.1.3-linux_${SGW_ARCH}.deb"
+RUN SGW_ARCH=$(uname -m) \
+    && curl -s -o /var/tmp/couchbase-sync-gateway-enterprise.deb "http://packages.couchbase.com/releases/couchbase-sync-gateway/3.0.4/couchbase-sync-gateway-enterprise_3.0.4_${SGW_ARCH}.deb"
 
 # Prepare Python environment
 RUN pip3 install --upgrade pip setuptools wheel
@@ -19,7 +22,7 @@ RUN useradd couchbase -u 1000 -g couchbase -M
 # Install Couchbase Server
 RUN apt-get update
 RUN export INSTALL_DONT_START_SERVER=1 \
-    && apt-get install -q -y couchbase-server
+    && apt-get install -q -y /var/tmp/couchbase-server-enterprise.deb
 
 # Indicate that Couchbase is running in a container
 RUN sed -i -e '1 s/$/\/docker/' /opt/couchbase/VARIANT.txt
@@ -48,7 +51,7 @@ RUN mkdir /demo/couchbase/bin
 # The package includes a post install action that will not work in a container
 # so we remove it before we install the package
 WORKDIR /var/tmp
-RUN dpkg-deb -R couchbase-sync-gateway-enterprise_3.0.3_x86_64.deb tmp
+RUN dpkg-deb -R couchbase-sync-gateway-enterprise.deb tmp
 RUN rm tmp/DEBIAN/postinst
 RUN dpkg-deb -b tmp couchbase-sync-gateway.deb
 WORKDIR /
