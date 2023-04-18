@@ -6,11 +6,19 @@ ENV TZ=Etc/UTC
 RUN apt-get update
 RUN apt-get install -q -y runit numactl tzdata lsof lshw bzip2 jq git vim netcat sysstat apt-utils ca-certificates gnupg lsb-release net-tools python3.9 python3.9-dev python3-pip python3-setuptools cmake build-essential curl sudo software-properties-common make pkg-config libssl-dev
 
+# Install Node.js
+RUN mkdir /usr/local/nvm
+ENV NVM_DIR=/usr/local/nvm
+RUN curl -s -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.2/install.sh | bash \
+    && . $NVM_DIR/nvm.sh \
+    && nvm install 19.3.0 \
+    && nvm install-latest-npm
+
 # Get Couchbase release package and Sync Gateway package
 RUN SGW_ARCH=$(dpkg --print-architecture) \
-    && curl -s -o /var/tmp/couchbase-server-enterprise.deb "https://packages.couchbase.com/releases/7.1.3/couchbase-server-enterprise_7.1.3-linux_${SGW_ARCH}.deb"
+    && curl -s -o /var/tmp/couchbase-server-enterprise.deb "https://packages.couchbase.com/releases/7.1.4/couchbase-server-enterprise_7.1.4-linux_${SGW_ARCH}.deb"
 RUN SGW_ARCH=$(uname -m) \
-    && curl -s -o /var/tmp/couchbase-sync-gateway-enterprise.deb "http://packages.couchbase.com/releases/couchbase-sync-gateway/3.0.4/couchbase-sync-gateway-enterprise_3.0.4_${SGW_ARCH}.deb"
+    && curl -s -o /var/tmp/couchbase-sync-gateway-enterprise.deb "http://packages.couchbase.com/releases/couchbase-sync-gateway/3.0.5/couchbase-sync-gateway-enterprise_3.0.5_${SGW_ARCH}.deb"
 
 # Prepare Python environment
 RUN pip3 install --upgrade pip setuptools wheel
@@ -66,9 +74,17 @@ COPY config/sync_gateway.json /etc/sync_gateway/config.json
 COPY scripts/entrypoint.sh /demo/couchbase/bin
 
 # Add CBPerf utility that will be used to install the demo schema
-RUN git clone -b Version_2.0 https://github.com/mminichino/cbperf /demo/couchbase/cbperf
+RUN git clone https://github.com/mminichino/cbperf /demo/couchbase/cbperf
+RUN git clone https://github.com/mminichino/sgwcli /demo/couchbase/sgwcli
+RUN git clone https://github.com/mminichino/demo-auth-service /demo/couchbase/microservice
 WORKDIR /demo/couchbase/cbperf
 RUN ./setup.sh -y
+WORKDIR /demo/couchbase/sgwcli
+RUN ./setup.sh -y
+WORKDIR /demo/couchbase/microservice
+RUN . $NVM_DIR/nvm.sh \
+    && npm install \
+    && npm install pm2 -g
 
 # Cleanup
 RUN rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*

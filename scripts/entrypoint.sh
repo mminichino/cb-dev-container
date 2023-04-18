@@ -49,6 +49,10 @@ if [ "$(whoami)" = "couchbase" ]; then
     fi
 fi
 
+if [ -e /etc/service/git-daemon ]; then
+  rm /etc/service/git-daemon
+fi
+
 # Start Couchbase Server
 echo "Starting Couchbase Server -- Web UI available at http://<ip>:$restPortValue"
 echo "and logs available in /opt/couchbase/var/lib/couchbase/logs"
@@ -124,7 +128,7 @@ cd /demo/couchbase/cbperf
 set +e
 while true; do
   sleep 1
-  ./cb_perf list --host 127.0.0.1 --ping --test 2>&1
+  bin/cb_perf list --host 127.0.0.1 --ping --test 2>&1
   [ $? -ne 0 ] && continue
   break
 done
