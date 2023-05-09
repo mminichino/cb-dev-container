@@ -18,7 +18,7 @@ RUN curl -s -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.2/install.sh 
 RUN SGW_ARCH=$(dpkg --print-architecture) \
     && curl -s -o /var/tmp/couchbase-server-enterprise.deb "https://packages.couchbase.com/releases/7.1.4/couchbase-server-enterprise_7.1.4-linux_${SGW_ARCH}.deb"
 RUN SGW_ARCH=$(uname -m) \
-    && curl -s -o /var/tmp/couchbase-sync-gateway-enterprise.deb "http://packages.couchbase.com/releases/couchbase-sync-gateway/3.0.5/couchbase-sync-gateway-enterprise_3.0.5_${SGW_ARCH}.deb"
+    && curl -s -o /var/tmp/couchbase-sync-gateway-enterprise.deb "http://packages.couchbase.com/releases/couchbase-sync-gateway/3.1.0/couchbase-sync-gateway-enterprise_3.1.0_${SGW_ARCH}.deb"
 
 # Prepare Python environment
 RUN pip3 install --upgrade pip setuptools wheel
