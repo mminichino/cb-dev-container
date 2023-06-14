@@ -1,5 +1,28 @@
 #!/bin/bash
+USE_SSL=0
+PRINT_USAGE="Usage: $0 [ -s ]
+             -s Use SSL for Sync Gateway"
 set -e
+
+function print_usage {
+if [ -n "$PRINT_USAGE" ]; then
+   echo "$PRINT_USAGE"
+fi
+}
+
+while getopts "s" opt
+do
+  case $opt in
+    s)
+      USE_SSL=1
+      ;;
+    \?)
+      print_usage
+      exit 1
+      ;;
+  esac
+done
+shift $((OPTIND -1))
 
 staticConfigFile=/opt/couchbase/etc/couchbase/static_config
 restPortValue=8091
@@ -59,8 +82,14 @@ echo "and logs available in /opt/couchbase/var/lib/couchbase/logs"
 runsvdir -P /etc/service 'log: ...........................................................................................................................................................................................................................................................................................................................................................................................................' &
 
 # Start Sync Gateway
-echo "Starting Sync Gateway"
-/opt/couchbase-sync-gateway/bin/sync_gateway --defaultLogFilePath=/demo/couchbase/logs /etc/sync_gateway/config.json &
+if [ "$USE_SSL" -eq 0 ]; then
+  echo "Starting Sync Gateway"
+  /opt/couchbase-sync-gateway/bin/sync_gateway --defaultLogFilePath=/demo/couchbase/logs /etc/sync_gateway/config.json &
+else
+  echo "Starting Sync Gateway (SSL)"
+  /opt/couchbase-sync-gateway/bin/sync_gateway --defaultLogFilePath=/demo/couchbase/logs /etc/sync_gateway/config_ssl.json &
+fi
+echo $! > /etc/sync_gateway/run.pid
 
 # Wait for CBS to start
 echo -n "Waiting for Couchbase Server to start ... "

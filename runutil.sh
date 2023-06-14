@@ -14,6 +14,7 @@ PRINT_USAGE="Usage: $0 <options>
              --yes   Assume yes to questions
              --prune Prune unused docker image data"
 YES=0
+RUN_ARGS=""
 container=cbdev
 image=mminichino/${container}
 
@@ -66,7 +67,7 @@ while true; do
                                 -p 4985:4985 \
                                 -p 8080:8080 \
                                 -p 8081:8081 \
-                                ${image}:latest
+                                ${image}:latest $RUN_ARGS
             exit
             ;;
     --show )
@@ -92,6 +93,10 @@ while true; do
     --local )
             shift
             image=${container}
+            ;;
+    --ssl  )
+            shift
+            RUN_ARGS="${RUN_ARGS} -s"
             ;;
     --stop )
             shift

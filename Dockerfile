@@ -69,6 +69,10 @@ RUN chmod 755 /opt/couchbase-sync-gateway/service/sync_gateway_service_install.s
 RUN chmod 755 /opt/couchbase-sync-gateway/examples
 RUN useradd sync_gateway -u 1002 -g couchbase
 COPY config/sync_gateway.json /etc/sync_gateway/config.json
+COPY config/sync_gateway_ssl.json /etc/sync_gateway/config_ssl.json
+COPY config/privkey.pem /etc/sync_gateway/privkey.pem
+COPY config/cert.pem /etc/sync_gateway/cert.pem
+COPY scripts/enable_ssl.sh /etc/sync_gateway/enable_ssl.sh
 
 # Entry point script to configure the environment on container start
 COPY scripts/entrypoint.sh /demo/couchbase/bin
@@ -94,4 +98,4 @@ EXPOSE 4984 4985 4986 8091 8092 8093 8094 8095 8096 11207 11210 11211 18091 1809
 VOLUME /opt/couchbase/var
 
 # Start the container
-CMD ["/demo/couchbase/bin/entrypoint.sh"]
+ENTRYPOINT ["/demo/couchbase/bin/entrypoint.sh"]
