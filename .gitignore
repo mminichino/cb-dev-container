@@ -12,7 +12,6 @@ target
 *.iml
 *.ipr
 *.iws
-venv/
 setup.log
 
 # ignore standard Vim and Emacs temp files
@@ -24,3 +23,15 @@ setup.log
 
 # igniore git in nested packages
 */.git
+
+# Environments
+.env
+.venv
+env/
+venv/
+venv36/
+venv37/
+venv38/
+ENV/
+env.bak/
+venv.bak/

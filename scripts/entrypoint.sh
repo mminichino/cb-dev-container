@@ -81,101 +81,22 @@ echo "Starting Couchbase Server -- Web UI available at http://<ip>:$restPortValu
 echo "and logs available in /opt/couchbase/var/lib/couchbase/logs"
 runsvdir -P /etc/service 'log: ...........................................................................................................................................................................................................................................................................................................................................................................................................' &
 
-# Start Sync Gateway
-if [ "$USE_SSL" -eq 0 ]; then
-  echo "Starting Sync Gateway"
-  /opt/couchbase-sync-gateway/bin/sync_gateway --defaultLogFilePath=/demo/couchbase/logs /etc/sync_gateway/config.json &
-else
-  echo "Starting Sync Gateway (SSL)"
-  /opt/couchbase-sync-gateway/bin/sync_gateway --defaultLogFilePath=/demo/couchbase/logs /etc/sync_gateway/config_ssl.json &
-fi
-echo $! > /etc/sync_gateway/run.pid
+echo "Configuring Couchbase Server"
+swmgr cluster create -n testdb
+echo "Starting Sync Gateway"
+swmgr gateway configure
+bundlemgr -b StartSGW
 
-# Wait for CBS to start
-echo -n "Waiting for Couchbase Server to start ... "
-while true; do
-  if /opt/couchbase/bin/couchbase-cli host-list \
-  --cluster 127.0.0.1 \
-  --username Administrator \
-  --password "password" | \
-  grep -q "Unable to connect"; then
-    sleep 1
-  else
-    break
-  fi
-done
-echo "done."
-
-# Configuration section
-echo "Configuring Couchbase Cluster"
-
-# Initialize the node
-if /opt/couchbase/bin/couchbase-cli host-list \
-  --cluster 127.0.0.1 \
-  --username Administrator \
-  --password "password" | \
-  grep -q "127.0.0.1"; then
-    echo "This node already exists in the cluster"
-else
-/opt/couchbase/bin/couchbase-cli node-init \
-  --cluster 127.0.0.1 \
-  --username Administrator \
-  --password "password" \
-  --node-init-hostname 127.0.0.1 \
-  --node-init-data-path /opt/couchbase/var/lib/couchbase/data \
-  --node-init-index-path /opt/couchbase/var/lib/couchbase/data \
-  --node-init-analytics-path /opt/couchbase/var/lib/couchbase/data \
-  --node-init-eventing-path /opt/couchbase/var/lib/couchbase/data
-fi
-
-# Initialize the single node cluster
-if /opt/couchbase/bin/couchbase-cli setting-cluster \
-  --cluster 127.0.0.1 \
-  --username Administrator \
-  --password "password" | \
-  grep -q 'ERROR: Cluster is not initialized'; then
-/opt/couchbase/bin/couchbase-cli cluster-init \
-  --cluster 127.0.0.1 \
-  --cluster-username Administrator \
-  --cluster-password "password" \
-  --cluster-port 8091 \
-  --cluster-ramsize 256 \
-  --cluster-fts-ramsize 512 \
-  --cluster-index-ramsize 256 \
-  --cluster-eventing-ramsize 256 \
-  --cluster-analytics-ramsize 1024 \
-  --cluster-name empdemo \
-  --index-storage-setting default \
-  --services "data,index,query"
-else
-  echo "This node is already initialized"
-fi
-
-cd /demo/couchbase/cbperf
-
-# Wait for the cluster to initialize and for all services to start
-set +e
-while true; do
-  sleep 1
-  bin/cb_perf list --host 127.0.0.1 --ping --test 2>&1
-  [ $? -ne 0 ] && continue
-  break
-done
+swmgr cluster wait -n testdb
+swmgr gateway wait
 
 cd /demo/couchbase
 
 # Configuration complete
 
-while true; do
-  if [ -f /demo/couchbase/logs/sg_info.log ]; then
-    break
-  fi
-  sleep 1
-done
-
 touch /demo/couchbase/.ready
 
 echo "The following output is now a tail of sg_info.log:"
-tail -f /demo/couchbase/logs/sg_info.log &
+tail -f /home/sync_gateway/logs/sg_info.log &
 childPID=$!
 wait $childPID

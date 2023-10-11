@@ -17,6 +17,7 @@ YES=0
 RUN_ARGS=""
 container=cbdev
 image=mminichino/${container}
+container_tag="4.0.0"
 
 function print_usage {
 if [ -n "$PRINT_USAGE" ]; then
@@ -67,7 +68,7 @@ while true; do
                                 -p 4985:4985 \
                                 -p 8080:8080 \
                                 -p 8081:8081 \
-                                ${image}:latest $RUN_ARGS
+                                ${image}:${container_tag}
             exit
             ;;
     --show )
