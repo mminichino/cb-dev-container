@@ -12,15 +12,7 @@ major:
 push:
 		docker system prune -f
 		docker buildx prune -f
-		docker buildx build --platform linux/amd64 \
-		--no-cache \
-		-t mminichino/$(CONTAINER):latest \
-		-t mminichino/$(CONTAINER):$(PROJECT_VERSION) \
-		-f Dockerfile . \
-		--push
-		docker system prune -f
-		docker buildx prune -f
-		docker buildx build --platform linux/arm64 \
+		docker buildx build --platform linux/amd64,linux/arm64 \
 		--no-cache \
 		-t mminichino/$(CONTAINER):latest \
 		-t mminichino/$(CONTAINER):$(PROJECT_VERSION) \
