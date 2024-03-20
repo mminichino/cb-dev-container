@@ -3,6 +3,11 @@ export CONTAINER := "cbdev"
 export PROJECT_NAME := $$(basename $$(pwd))
 export PROJECT_VERSION := $(shell cat VERSION)
 
+merge:
+		git checkout main
+		git pull origin main
+		git merge "Version_$(shell cat VERSION)"
+		git push origin main
 patch:
 		bumpversion --allow-dirty patch
 minor:

@@ -1,4 +1,4 @@
-FROM ubuntu:focal as base
+FROM ubuntu:jammy as base
 
 # Install required OS packages
 ENV DEBIAN_FRONTEND=noninteractive
@@ -16,9 +16,9 @@ RUN curl -s -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.2/install.sh 
 
 # Get Couchbase release package and Sync Gateway package
 RUN SGW_ARCH=$(dpkg --print-architecture) \
-    && curl -s -o /var/tmp/couchbase-server-enterprise.deb "https://packages.couchbase.com/releases/7.2.2/couchbase-server-enterprise_7.2.2-linux_${SGW_ARCH}.deb"
+    && curl -s -o /var/tmp/couchbase-server-enterprise.deb "https://packages.couchbase.com/releases/7.6.0/couchbase-server-enterprise_7.6.0-linux_${SGW_ARCH}.deb"
 RUN SGW_ARCH=$(uname -m) \
-    && curl -s -o /var/tmp/couchbase-sync-gateway-enterprise.deb "http://packages.couchbase.com/releases/couchbase-sync-gateway/3.1.1/couchbase-sync-gateway-enterprise_3.1.1_${SGW_ARCH}.deb"
+    && curl -s -o /var/tmp/couchbase-sync-gateway-enterprise.deb "http://packages.couchbase.com/releases/couchbase-sync-gateway/3.1.6/couchbase-sync-gateway-enterprise_3.1.6_${SGW_ARCH}.deb"
 
 # Prepare Python environment
 RUN pip3 install --upgrade pip setuptools wheel
