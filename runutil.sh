@@ -17,7 +17,7 @@ YES=0
 RUN_ARGS=""
 container=cbdev
 image=mminichino/${container}
-container_tag="4.0.0"
+container_tag="4.0.1"
 
 function print_usage {
 if [ -n "$PRINT_USAGE" ]; then
