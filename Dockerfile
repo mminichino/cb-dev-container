@@ -16,7 +16,7 @@ RUN curl -s -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.2/install.sh 
 
 # Get Couchbase release package and Sync Gateway package
 RUN SGW_ARCH=$(dpkg --print-architecture) \
-    && curl -s -o /var/tmp/couchbase-server-enterprise.deb "https://packages.couchbase.com/releases/7.6.0/couchbase-server-enterprise_7.6.0-linux_${SGW_ARCH}.deb"
+    && curl -s -o /var/tmp/couchbase-server-enterprise.deb "https://packages.couchbase.com/releases/7.2.4/couchbase-server-enterprise_7.2.4-linux_${SGW_ARCH}.deb"
 RUN SGW_ARCH=$(uname -m) \
     && curl -s -o /var/tmp/couchbase-sync-gateway-enterprise.deb "http://packages.couchbase.com/releases/couchbase-sync-gateway/3.1.3/couchbase-sync-gateway-enterprise_3.1.3_${SGW_ARCH}.deb"
 

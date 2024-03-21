@@ -1,4 +1,4 @@
-# Couchbase Dev Container 4.0.1
+# Couchbase Dev Container 4.0.2
 
 Container to run Sync Gateway and Couchbase Server for development purposes
 
